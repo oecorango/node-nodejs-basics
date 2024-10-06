@@ -1,4 +1,5 @@
-import path from 'path';
+import { join, sep } from 'path';
+import { promises as fs } from 'fs';
 import { release, version } from 'os';
 import { createServer as createServerHttp } from 'http';
 import { fileURLToPath } from 'url';
@@ -11,17 +12,12 @@ import './files/c.js';
 
 const random = Math.random();
 
-let unknownObject;
-
-if (random > 0.5) {
-    unknownObject = await import('./files/a.json', { assert: { type: 'json' } });
-} else {
-    unknownObject = await import('./files/b.json', { assert: { type: 'json' } });
-}
+const data = await fs.readFile(join(__dirname, 'files', random > 0.5 ? 'a.json' : 'b.json'), 'utf-8');
+const parseData = JSON.parse(data);
 
 console.log(`Release ${release()}`);
 console.log(`Version ${version()}`);
-console.log(`Path segment separator is "${path.sep}"`);
+console.log(`Path segment separator is "${sep}"`);
 
 console.log(`Path to current file is ${__filename}`);
 console.log(`Path to current directory is ${__dirname}`);
@@ -30,13 +26,13 @@ const myServer = createServerHttp((_, res) => {
     res.end('Request accepted');
 });
 
-const PORT = 3081;
+const PORT = 3088;
 
-console.log(unknownObject);
+console.log(parseData);
 
 myServer.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
     console.log('To terminate it, use Ctrl+C combination');
 });
 
-export { unknownObject, myServer };
+export { parseData, myServer };
